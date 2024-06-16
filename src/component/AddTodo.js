@@ -7,6 +7,9 @@ class AddTodo extends Component {
     super();
     this.state = {
       content: "",
+      date: "",
+      precondition: "",
+      acceptanceCriteria: "",
     };
   }
   // The handleChange function updates the react state with the new input value provided from the user.
@@ -15,8 +18,24 @@ class AddTodo extends Component {
   handleChange = (event) => {
     this.setState({
       content: event.target.value,
+      date: new Date().toLocaleString("en-US"),
     });
   };
+
+  handlePreChange = (event) => {
+    this.setState({
+      precondition: event.target.value,
+    });
+    console.log(event.target.value);
+  };
+
+  handleAcceptanceCriteriaChange = (event) => {
+    this.setState({
+      acceptanceCriteria: event.target.value,
+    });
+    console.log(event.target.value);
+  };
+
   // The handleSubmit function collects the forms input and puts it into the react state.
   // event.preventDefault() is called to prevents default event behavior like refreshing the browser.
   // this.props.addTodo(this.state) passes the current state (or user input) into the addTodo function defined
@@ -27,6 +46,9 @@ class AddTodo extends Component {
       this.props.addTodo(this.state);
       this.setState({
         content: "",
+        date: "",
+        precondition: "",
+        acceptanceCriteria: "",
       });
     }
   };
@@ -46,6 +68,18 @@ class AddTodo extends Component {
           onChange={this.handleChange}
           value={this.state.content}
           data-testid="new-item-textfield"
+        />
+        <TextField
+          label="Add precondition"
+          variant="outlined"
+          onChange={this.handlePreChange}
+          value={this.state.precondition}
+        />
+        <TextField
+          label="Add acceptance criteria"
+          variant="outlined"
+          onChange={this.handleAcceptanceCriteriaChange}
+          value={this.state.acceptanceCriteria}
         />
         <Button
           style={{ marginLeft: "10px" }}
