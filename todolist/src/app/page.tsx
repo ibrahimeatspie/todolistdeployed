@@ -20,43 +20,102 @@ import { DialogFooter } from "@/components/ui/dialog";
 import Todo from "@/components/Todo";
 import { useUser } from "@clerk/clerk-react";
 import { useAuth } from "@clerk/clerk-react";
+import { Task } from "@prisma/client";
 
-interface Todo {
-  content: string;
-  preCondition: string;
-  acceptanceCriteria: string;
-  date: string;
-  id: number;
-}
+// interface Todo {
+//   content: string;
+//   preCondition: string;
+//   acceptanceCriteria: string;
+//   date: string;
+//   id: string;
+// }
 
 export default function Home() {
   const { isSignedIn, user, isLoaded } = useUser();
 
-  const [todos, setTodos] = useState<Todo[]>([]);
+  const [todos, setTodos] = useState<Task[]>([]);
 
   const [taskInputValue, setTaskInputValue] = useState<string>("");
   const [preVal, setPreVal] = useState<string>("");
   const [acceptVal, setAcceptVal] = useState<string>("");
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!taskInputValue) return;
-    setTodos((prevTodos) => [
-      ...prevTodos,
-      {
-        content: taskInputValue,
-        preCondition: preVal,
-        acceptanceCriteria: acceptVal,
-        date: new Date().toLocaleDateString(),
-        id: Math.random(),
-      },
-    ]);
-    setTaskInputValue("");
-    setPreVal("");
-    setAcceptVal("");
+    let id: string = crypto.randomUUID();
+    let date: Date = new Date();
+
+    const taskData: Task = {
+      content: taskInputValue,
+      preCondition: preVal,
+      acceptanceCriteria: acceptVal,
+      date,
+      id,
+      userId: user!.id,
+    };
+
+    try {
+      const response = await fetch("/api/tasks", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(taskData),
+      });
+
+      if (response.ok) {
+        const newTask = await response.json();
+        console.log("Task created:", newTask);
+        setTodos((prevTodos) => [
+          ...prevTodos,
+          {
+            content: taskInputValue,
+            preCondition: preVal,
+            acceptanceCriteria: acceptVal,
+            date,
+            id,
+            userId: user!.id,
+          },
+        ]);
+
+        // Reset form or handle success (e.g., redirect or display a message)
+      } else {
+        const errorText = await response.text();
+        console.error("Failed to create task:", errorText);
+      }
+    } catch (error) {
+      console.error("An error occurred:", error);
+    } finally {
+      setTaskInputValue("");
+      setPreVal("");
+      setAcceptVal("");
+    }
   };
 
-  const deleteTodo = (id: number) => {
-    setTodos((prevTodos) => prevTodos.filter((todo) => todo.id !== id));
+  const deleteTodo = async (id: string) => {
+    const taskData = { id };
+    try {
+      const response = await fetch("/api/deleteTask", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(taskData),
+      });
+
+      if (response.ok) {
+        const newTask = await response.json();
+        console.log("Task deleted:", newTask);
+
+        setTodos((prevTodos) => prevTodos.filter((todo) => todo.id !== id));
+
+        // Reset form or handle success (e.g., redirect or display a message)
+      } else {
+        const errorText = await response.text();
+        console.error("Failed to delete task:", errorText);
+      }
+    } catch (error) {
+      console.error("An error occurred:", error);
+    }
   };
 
   const handleTaskInputChange = (
@@ -78,6 +137,24 @@ export default function Home() {
   const taskInputRef = useRef<HTMLInputElement>(null);
   const preInputRef = useRef<HTMLInputElement>(null);
   const acceptInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(()=>{
+    const fetchTasks = async () => {
+      try {
+        const response = await fetch("/api/tasks");
+        if (response.ok) {
+          const tasks = await response.json();
+          setTodos(tasks);
+        } else {
+          const errorText = await response.text();
+          console.error("Failed to fetch tasks:", errorText);
+        }
+      } catch (error) {
+        console.error("An error occurred:", error);
+      }
+    };
+    fetchTasks();
+  },[])
   return (
     <div className="w-[100vw] h-[100vh] flex flex-col">
       <Navbar />
@@ -146,9 +223,9 @@ export default function Home() {
         {todos.map((todo, index) => (
           <Todo
             content={todo.content}
-            preCondition={todo.preCondition}
-            acceptanceCriteria={todo.acceptanceCriteria}
-            date={todo.date}
+            preCondition={todo.preCondition!}
+            acceptanceCriteria={todo.acceptanceCriteria!}
+            date={todo.date.toLocaleString()}
             id={todo.id}
             key={todo.id}
             deleteTodo={deleteTodo}

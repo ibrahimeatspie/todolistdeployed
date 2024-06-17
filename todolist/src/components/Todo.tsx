@@ -16,8 +16,8 @@ interface ITodo {
   preCondition: string;
   acceptanceCriteria: string;
   date: string;
-  deleteTodo: (id: number) => void;
-  id: number;
+  deleteTodo: (id: string) => void;
+  id: string;
 }
 
 const Todo: React.FC<ITodo> = ({
