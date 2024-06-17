@@ -9,24 +9,32 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { useRouter } from "next/navigation";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
 import { DialogFooter } from "@/components/ui/dialog";
 import Todo from "@/components/Todo";
+import { useUser } from "@clerk/clerk-react";
+import { useAuth } from "@clerk/clerk-react";
 
 interface Todo {
   content: string;
   preCondition: string;
   acceptanceCriteria: string;
   date: string;
+  id: number;
 }
 
 export default function Home() {
+  const { isSignedIn, user, isLoaded } = useUser();
+
+
   const [todos, setTodos] = useState<Todo[]>([]);
+
   const [taskInputValue, setTaskInputValue] = useState<string>("");
   const [preVal, setPreVal] = useState<string>("");
   const [acceptVal, setAcceptVal] = useState<string>("");
@@ -40,11 +48,16 @@ export default function Home() {
         preCondition: preVal,
         acceptanceCriteria: acceptVal,
         date: new Date().toLocaleDateString(),
+        id: Math.random(),
       },
     ]);
     setTaskInputValue("");
     setPreVal("");
     setAcceptVal("");
+  };
+
+  const deleteTodo = (id: number) => {
+    setTodos((prevTodos) => prevTodos.filter((todo) => todo.id !== id));
   };
 
   const handleTaskInputChange = (
@@ -122,26 +135,24 @@ export default function Home() {
             </div>
           </div>
           <DialogFooter>
-            <Button onClick={handleSubmit} type="submit">
-              Insert
-            </Button>
+            <DialogTrigger asChild>
+              <Button onClick={handleSubmit} type="submit">
+                Insert
+              </Button>
+            </DialogTrigger>
           </DialogFooter>
         </DialogContent>
       </Dialog>
       <div className="w-[100%] grow  flex flex-col items-center py-2 gap-y-4">
-        <Todo
-          content="eat food"
-          preCondition="get food"
-          acceptanceCriteria="finish food"
-          date="june 12"
-        />
         {todos.map((todo, index) => (
           <Todo
             content={todo.content}
             preCondition={todo.preCondition}
             acceptanceCriteria={todo.acceptanceCriteria}
             date={todo.date}
-            key={index}
+            id={todo.id}
+            key={todo.id}
+            deleteTodo={deleteTodo}
           />
         ))}
       </div>
