@@ -22,30 +22,13 @@ export function Navbar() {
             >
               Home
             </Link>
-            <Link
-              className="font-medium flex items-center text-sm transition-colors hover:underline"
-              href="#"
-            >
-              About
-            </Link>
-            <Link
-              className="font-medium flex items-center text-sm transition-colors hover:underline"
-              href="#"
-            >
-              Services
-            </Link>
-            <Link
-              className="font-medium flex items-center text-sm transition-colors hover:underline"
-              href="#"
-            >
-              Contact
-            </Link>
           </nav>
           <div className="flex items-center gap-4">
-            <Button size="sm" variant="outline">
-              Sign in
-            </Button>
-            <Button size="sm">Sign up</Button>
+            <Link href="/auth">
+              <Button size="sm" variant="outline">
+                Sign in
+              </Button>
+            </Link>
           </div>
         </div>
       </div>

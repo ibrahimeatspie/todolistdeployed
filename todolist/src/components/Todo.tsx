@@ -32,7 +32,7 @@ const Todo: React.FC<ITodo> = ({
     <Card className="w-[350px]">
       <CardHeader className="pb-1">
         <CardTitle>{content}</CardTitle>
-        <CardDescription>{date}</CardDescription>
+        <CardDescription>{date.toLocaleString()}</CardDescription>
       </CardHeader>
       <CardContent className="py-3">
         <div className="flex flex-col gap-4">
