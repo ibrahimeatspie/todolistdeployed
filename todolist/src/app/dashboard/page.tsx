@@ -21,25 +21,30 @@ import Todo from "@/components/Todo";
 import { useUser } from "@clerk/clerk-react";
 import { Task } from "@prisma/client";
 import { SignedIn, SignedOut } from "@clerk/nextjs";
+import { useQuery } from "@tanstack/react-query";
+
+const fetchTasks = async () => {
+  const response = await fetch("/api/tasks");
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(`Failed to fetch tasks: ${errorText}`);
+  }
+  return response.json();
+};
 
 export default function Home() {
   const { isSignedIn, user, isLoaded } = useUser();
-  useEffect(() => {
-    if (user) {
-      console.log(user.id);
-    }
-  }, [user]);
-  //   console.log(user.id);
-  //   useEffect(() => {
-  //     if (!user) {
-  //       return redirect("/auth");
-  //     }
-  //   }, []);
+
   const [todos, setTodos] = useState<Task[]>([]);
 
   const [taskInputValue, setTaskInputValue] = useState<string>("");
   const [preVal, setPreVal] = useState<string>("");
   const [acceptVal, setAcceptVal] = useState<string>("");
+
+  const { data, error, isLoading } = useQuery({
+    queryKey: ["tasks"],
+    queryFn: fetchTasks,
+  });
 
   const handleSubmit = async () => {
     if (!taskInputValue) return;
@@ -140,23 +145,23 @@ export default function Home() {
   const preInputRef = useRef<HTMLInputElement>(null);
   const acceptInputRef = useRef<HTMLInputElement>(null);
 
-  useEffect(() => {
-    const fetchTasks = async () => {
-      try {
-        const response = await fetch("/api/tasks");
-        if (response.ok) {
-          const tasks = await response.json();
-          setTodos(tasks);
-        } else {
-          const errorText = await response.text();
-          console.error("Failed to fetch tasks:", errorText);
-        }
-      } catch (error) {
-        console.error("An error occurred:", error);
-      }
-    };
-    fetchTasks();
-  }, []);
+  //   useEffect(() => {
+  //     const fetchTasks = async () => {
+  //       try {
+  //         const response = await fetch("/api/tasks");
+  //         if (response.ok) {
+  //           const tasks = await response.json();
+  //           setTodos(tasks);
+  //         } else {
+  //           const errorText = await response.text();
+  //           console.error("Failed to fetch tasks:", errorText);
+  //         }
+  //       } catch (error) {
+  //         console.error("An error occurred:", error);
+  //       }
+  //     };
+  //     fetchTasks();
+  //   }, []);
   return (
     <div className="w-[100vw] h-[100vh] flex flex-col">
       <Navbar />
@@ -223,17 +228,20 @@ export default function Home() {
           </DialogContent>
         </Dialog>
         <div className="w-[100%] grow  flex flex-col items-center py-2 gap-y-4">
-          {todos.map((todo, index) => (
-            <Todo
-              content={todo.content}
-              preCondition={todo.preCondition!}
-              acceptanceCriteria={todo.acceptanceCriteria!}
-              date={todo.date.toLocaleString()}
-              id={todo.id}
-              key={todo.id}
-              deleteTodo={deleteTodo}
-            />
-          ))}
+          {isLoading && <h1>Loading tasks</h1>}
+          {error && <h1>{error.message}</h1>}
+          {data &&
+            data.map((todo: Task) => (
+              <Todo
+                content={todo.content}
+                preCondition={todo.preCondition!}
+                acceptanceCriteria={todo.acceptanceCriteria!}
+                date={todo.date.toLocaleString()}
+                id={todo.id}
+                key={todo.id}
+                deleteTodo={deleteTodo}
+              />
+            ))}
         </div>
       </SignedIn>
     </div>

@@ -6,12 +6,13 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 
+
 export function Navbar() {
   return (
     <nav className=" bg-white shadow-sm dark:bg-gray-950/90">
       <div className="w-full max-w-7xl mx-auto px-4">
         <div className="flex justify-between h-14 items-center">
-          <Link className="flex items-center" href="#">
+          <Link className="flex items-center" href="/">
             <MountainIcon className="h-6 w-6" />
             <span className="sr-only">Acme Inc</span>
           </Link>
