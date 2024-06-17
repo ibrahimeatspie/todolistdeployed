@@ -32,7 +32,6 @@ interface Todo {
 export default function Home() {
   const { isSignedIn, user, isLoaded } = useUser();
 
-
   const [todos, setTodos] = useState<Todo[]>([]);
 
   const [taskInputValue, setTaskInputValue] = useState<string>("");
@@ -93,7 +92,7 @@ export default function Home() {
           <DialogHeader>
             <DialogTitle>Insert task</DialogTitle>
             <DialogDescription>
-              Make changes to your profile here. Click save when you're done.
+              Make changes to your prrofile here. Click save when you're done.
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4">
