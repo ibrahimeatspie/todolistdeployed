@@ -213,7 +213,7 @@ export default function Home() {
             </DialogFooter>
           </DialogContent>
         </Dialog>
-        <div className="w-[100%] grow  flex flex-col items-center py-2 gap-y-4">
+        <div className="w-[100%] grow  flex flex-col justify-center items-center py-2 gap-y-4">
           {(isLoading || isFetching) && <h1>Loading tasks</h1>}
           {error && <h1>{error.message}</h1>}
           {data ? (
