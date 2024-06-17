@@ -29,22 +29,20 @@ const fetchTasks = async () => {
     const errorText = await response.text();
     throw new Error(`Failed to fetch tasks: ${errorText}`);
   }
-  return response.json();
+  let data = response.json();
+  return data;
 };
 
 export default function Home() {
   const { isSignedIn, user, isLoaded } = useUser();
-
-  const [todos, setTodos] = useState<Task[]>([]);
+  const { refetch, data, error, isLoading, isFetching } = useQuery({
+    queryKey: ["tasks"],
+    queryFn: fetchTasks,
+  });
 
   const [taskInputValue, setTaskInputValue] = useState<string>("");
   const [preVal, setPreVal] = useState<string>("");
   const [acceptVal, setAcceptVal] = useState<string>("");
-
-  const { data, error, isLoading } = useQuery({
-    queryKey: ["tasks"],
-    queryFn: fetchTasks,
-  });
 
   const handleSubmit = async () => {
     if (!taskInputValue) return;
@@ -72,17 +70,7 @@ export default function Home() {
       if (response.ok) {
         const newTask = await response.json();
         console.log("Task created:", newTask);
-        setTodos((prevTodos) => [
-          ...prevTodos,
-          {
-            content: taskInputValue,
-            preCondition: preVal,
-            acceptanceCriteria: acceptVal,
-            date,
-            id,
-            userId: user!.id,
-          },
-        ]);
+        refetch();
 
         // Reset form or handle success (e.g., redirect or display a message)
       } else {
@@ -113,8 +101,7 @@ export default function Home() {
         const newTask = await response.json();
         console.log("Task deleted:", newTask);
 
-        setTodos((prevTodos) => prevTodos.filter((todo) => todo.id !== id));
-
+        refetch();
         // Reset form or handle success (e.g., redirect or display a message)
       } else {
         const errorText = await response.text();
@@ -176,8 +163,7 @@ export default function Home() {
             <DialogHeader>
               <DialogTitle>Insert task</DialogTitle>
               <DialogDescription>
-                Make changes to your prrofile here. Click save when you are
-                done.
+                Make changes to your profile here. Click save when you are done.
               </DialogDescription>
             </DialogHeader>
             <div className="grid gap-4 py-4">
@@ -228,9 +214,9 @@ export default function Home() {
           </DialogContent>
         </Dialog>
         <div className="w-[100%] grow  flex flex-col items-center py-2 gap-y-4">
-          {isLoading && <h1>Loading tasks</h1>}
+          {(isLoading || isFetching) && <h1>Loading tasks</h1>}
           {error && <h1>{error.message}</h1>}
-          {data &&
+          {data && data.length > 0 ? (
             data.map((todo: Task) => (
               <Todo
                 content={todo.content}
@@ -241,7 +227,10 @@ export default function Home() {
                 key={todo.id}
                 deleteTodo={deleteTodo}
               />
-            ))}
+            ))
+          ) : (
+            <h1>You have 0 tasks remaining</h1>
+          )}
         </div>
       </SignedIn>
     </div>
