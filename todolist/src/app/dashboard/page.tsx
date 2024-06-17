@@ -216,21 +216,23 @@ export default function Home() {
         <div className="w-[100%] grow  flex flex-col items-center py-2 gap-y-4">
           {(isLoading || isFetching) && <h1>Loading tasks</h1>}
           {error && <h1>{error.message}</h1>}
-          {data && data.length > 0 ? (
-            data.map((todo: Task) => (
-              <Todo
-                content={todo.content}
-                preCondition={todo.preCondition!}
-                acceptanceCriteria={todo.acceptanceCriteria!}
-                date={todo.date.toLocaleString()}
-                id={todo.id}
-                key={todo.id}
-                deleteTodo={deleteTodo}
-              />
-            ))
-          ) : (
-            <h1>You have 0 tasks remaining</h1>
-          )}
+          {data ? (
+            data.length > 0 ? (
+              data.map((todo: Task) => (
+                <Todo
+                  content={todo.content}
+                  preCondition={todo.preCondition!}
+                  acceptanceCriteria={todo.acceptanceCriteria!}
+                  date={todo.date.toLocaleString()}
+                  id={todo.id}
+                  key={todo.id}
+                  deleteTodo={deleteTodo}
+                />
+              ))
+            ) : (
+              <h1>You have 0 tasks remaining</h1>
+            )
+          ) : null}
         </div>
       </SignedIn>
     </div>
